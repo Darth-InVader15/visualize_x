@@ -192,3 +192,32 @@ export const quarterlyRepeatCustomers = async(req, res) => {
         res.status(500).send('Server Error');
     }
 };
+export const customerGeographicalDistribution = async (req, res) => {
+    try {
+        const customers = await ShopifyCustomer.aggregate([
+            {
+                $match: {
+                    "default_address.city": { $ne: null }
+                }
+            },
+            {
+                $group: {
+                    _id: "$default_address.city",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    city: "$_id",
+                    count: 1
+                }
+            }
+        ]);
+
+        res.json(customers);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};

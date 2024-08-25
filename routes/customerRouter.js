@@ -1,5 +1,5 @@
 import express from "express"
-import { YearlyRepeatCustomers, dailyRepeatCustomers, monthlyCust, monthlyRepeatCustomers, quarterlyRepeatCustomers, yearlyCust } from "../controllers/customerController.js";
+import { YearlyRepeatCustomers, customerGeographicalDistribution, dailyRepeatCustomers, monthlyCust, monthlyRepeatCustomers, quarterlyRepeatCustomers, yearlyCust } from "../controllers/customerController.js";
 const router = express.Router();
 
 // router.use('/', (req,res) =>{
@@ -12,6 +12,6 @@ router.use('/repeat-customers/daily', dailyRepeatCustomers);
 router.use('/repeat-customers/monthly', monthlyRepeatCustomers);
 router.use('/repeat-customers/0.25', quarterlyRepeatCustomers);
 router.use('/repeat-customers/yearly', YearlyRepeatCustomers);
-
+router.use('/location', customerGeographicalDistribution);
 
 export default router;
