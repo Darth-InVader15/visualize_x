@@ -12,6 +12,9 @@ const OrderSchema = new mongoose.Schema({
             amount: String,
             currency_code: String
         }
+    },
+    customer: {
+        email: String
     }
 }, { collection: 'shopifyOrders' });
 

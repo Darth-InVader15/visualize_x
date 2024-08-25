@@ -1,4 +1,5 @@
 import ShopifyCustomer from "../schema/customerSchema.js"
+import shopifyOrders from "../schema/orderSchema.js";
 
 export const monthlyCust = async (req, res) => {
     try {
@@ -59,6 +60,133 @@ export const yearlyCust = async (req, res) => {
             { $sort: { '_id.year': 1 } }
         ]);
         res.json(customers);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+export const dailyRepeatCustomers = async(req, res) => {
+    try {
+        const repeatCustomers = await shopifyOrders.aggregate([
+            {
+                $addFields: {
+                    convertedDate: { $toDate: "$created_at" }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        day: { $dayOfMonth: "$convertedDate" },
+                        month: { $month: "$convertedDate" },
+                        year: { $year: "$convertedDate" },
+                        email: "$customer.email"
+                    },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            {
+                $match: {
+                    orderCount: { $gt: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
+        ]);
+        res.json(repeatCustomers);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+export const monthlyRepeatCustomers = async(req, res) => {
+    try {
+        const repeatCustomers = await shopifyOrders.aggregate([
+            {
+                $addFields: {
+                    convertedDate: { $toDate: "$created_at" }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        // day: { $dayOfMonth: "$convertedDate" },
+                        month: { $month: "$convertedDate" },
+                        year: { $year: "$convertedDate" },
+                        email: "$customer.email"
+                    },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            {
+                $match: {
+                    orderCount: { $gt: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.month': 1 } }
+        ]);
+        res.json(repeatCustomers);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+export const YearlyRepeatCustomers = async(req, res) => {
+    try {
+        const repeatCustomers = await shopifyOrders.aggregate([
+            {
+                $addFields: {
+                    convertedDate: { $toDate: "$created_at" }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        // day: { $dayOfMonth: "$convertedDate" },
+                        // month: { $month: "$convertedDate" },
+                        year: { $year: "$convertedDate" },
+                        email: "$customer.email"
+                    },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            {
+                $match: {
+                    orderCount: { $gt: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1 } }
+        ]);
+        res.json(repeatCustomers);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+export const quarterlyRepeatCustomers = async(req, res) => {
+    try {
+        const repeatCustomers = await shopifyOrders.aggregate([
+            {
+                $addFields: {
+                    convertedDate: { $toDate: "$created_at" }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        quarter: { $ceil: { $divide: [{ $month: "$convertedDate" }, 3] } },
+                        year: { $year: "$convertedDate" },
+                        email: "$email"
+                    },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            {
+                $match: {
+                    orderCount: { $gt: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.quarter': 1 } }
+        ]);
+        res.json(repeatCustomers);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
