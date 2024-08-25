@@ -65,9 +65,9 @@ export const yearlyCust = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
-export const dailyRepeatCustomers = async(req, res) => {
+export const dailyRepeatCustomers = async (req, res) => {
     try {
-        const repeatCustomers = await shopifyOrders.aggregate([
+        const repeatedCustomers = await shopifyOrders.aggregate([
             {
                 $addFields: {
                     convertedDate: { $toDate: "$created_at" }
@@ -76,27 +76,44 @@ export const dailyRepeatCustomers = async(req, res) => {
             {
                 $group: {
                     _id: {
-                        day: { $dayOfMonth: "$convertedDate" },
-                        month: { $month: "$convertedDate" },
-                        year: { $year: "$convertedDate" },
-                        email: "$customer.email"
+                        customerId: "$customer.id",
+                        date: { $dateToString: { format: "%Y-%m-%d", date: "$convertedDate" } }
                     },
                     orderCount: { $sum: 1 }
                 }
             },
+            // {
+            //     $match: {
+            //         orderCount: { $gt: 1 }
+            //     }
+            // },
             {
-                $match: {
-                    orderCount: { $gt: 1 }
+                $group: {
+                    _id: "$_id.date",
+                    totalRepeatedCustomers: { $sum: 1 }
                 }
             },
-            { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalRepeatedCustomers: 1
+                }
+            },
+            {
+                $sort: { 'date': 1 }
+            }
         ]);
-        res.json(repeatCustomers);
+
+        // Send the result directly as is
+        res.json(repeatedCustomers);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
+
+
 export const monthlyRepeatCustomers = async(req, res) => {
     try {
         const repeatCustomers = await shopifyOrders.aggregate([
