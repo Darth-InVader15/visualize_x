@@ -352,7 +352,40 @@ export const customerLifetimeValueByCohorts = async (req, res) => {
             }
         ]);
 
-        res.json(clvByCohorts);
+        // Format data for Chart.js
+        const labels = clvByCohorts.map(data => data.cohort);
+        const totalLifetimeValue = clvByCohorts.map(data => data.totalLifetimeValue);
+        const numberOfCustomers = clvByCohorts.map(data => data.numberOfCustomers);
+        const avgLifetimeValue = clvByCohorts.map(data => data.avgLifetimeValue);
+
+        const chartData = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Total Lifetime Value',
+                    data: totalLifetimeValue,
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)', // black with 20% opacity
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Number of Customers',
+                    data: numberOfCustomers,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Average Lifetime Value',
+                    data: avgLifetimeValue,
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        res.json(chartData);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
